@@ -18,8 +18,14 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
-@app.route('/blog', methods=['POST', 'GET'])
+@app.route('/blog')
 def blog():
+
+    blogs = Blog.query.all()
+    return render_template('blog.html', title_html="Blog", blogs=blogs)
+
+@app.route('/newpost', methods=['POST', 'GET'])
+def new_post():
 
     if request.method == 'POST':
 
@@ -45,12 +51,8 @@ def blog():
             new_blog = Blog(blog_title, blog_body)
             db.session.add(new_blog)
             db.session.commit()
+            return redirect("/blog")
 
-    blogs = Blog.query.all()
-    return render_template('blog.html', title_html="Blog", blogs=blogs)
-
-@app.route('/newpost', methods=['POST', 'GET'])
-def new_post():
     return render_template('newpost.html', title_html="New Post")
     
 if __name__ == '__main__':
