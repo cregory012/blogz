@@ -18,11 +18,20 @@ class Blog(db.Model):
         self.title = title
         self.body = body
 
+    def __repr__(self):
+        return  '<Title: {0}>'.format(self.title)   
+
 @app.route('/blog')
 def blog():
 
+    blog_id_str = request.args.get('id')
+    if blog_id_str:
+        blog_id = int(blog_id_str)
+        blog = Blog.query.get(blog_id)
+        return render_template('display.html', title_html="Display Blog", blog=blog)
+
     blogs = Blog.query.all()
-    return render_template('blog.html', title_html="Blog", blogs=blogs)
+    return render_template('blog.html', title_html="Build A Blog", blogs=blogs)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
@@ -45,15 +54,15 @@ def new_post():
             body_error = ''
 
         if  title_error or  body_error:
-            return render_template('newpost.html', title_html="New Post",
+            return render_template('newpost.html', title_html="Add Blog Entry",
              title_error=title_error, body_error=body_error, title=blog_title, body=blog_body)
         else:
             new_blog = Blog(blog_title, blog_body)
             db.session.add(new_blog)
             db.session.commit()
-            return redirect("/blog")
+            return redirect("/blog?id="+ str(new_blog.id))
 
-    return render_template('newpost.html', title_html="New Post")
+    return render_template('newpost.html', title_html="Add Blog Entry") 
     
 if __name__ == '__main__':
     app.run() 
