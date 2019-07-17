@@ -8,18 +8,68 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:launchcode@localh
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(120), unique = True)
+    password = db.Column(db.String(120))
+    blogs = db.relationship('Blog', backref = 'owner')
+
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+
 class Blog(db.Model):
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key = True)
     title = db.Column(db.String(120))
     body = db.Column(db.String(500))
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
-    def __init__(self, title, body):
+    def __init__(self, title, body, owner):
         self.title = title
         self.body = body
+        self.owner = owner  
 
     def __repr__(self):
         return  '<Title: {0}>'.format(self.title)   
+
+@app.route("/login", methods = ['POST', "GET"])
+def login():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form['password']
+        user = User.query.filter_by(username = username).first()
+        if user and user.password == password:
+            # TODO remember that user logged in
+            return redirect("/newpost")
+        else:
+            # TODO tell them why login failed
+            return '<h1>Error</h1>'  
+
+
+    return render_template("login.html")
+
+@app.route("/signup", methods = ['POST', "GET"])
+def signup():
+    if request.method == 'POST':
+        username = request.form["username"]
+        password = request.form['password']
+        verify = request.form["verify"]
+        # TODO validate: password and verify
+
+        existing_user = User.query.filter_by(username = username).first()
+        if not existing_user:
+            new_user = User(username, password)
+            db.session.add(new_user)
+            db.session.commit()
+            # TODO remember the user
+            return redirect("/newpost")
+        else:
+            # TODO message that the username is taken
+            return '<h1>Duplicate username</h1>'    
+
+    return render_template("signup.html")    
 
 @app.route('/blog')
 def blog():
