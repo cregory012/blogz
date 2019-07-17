@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, render_template
+from flask import Flask, redirect, request, render_template, session
 from flask_sqlalchemy import SQLAlchemy 
 
 
@@ -7,6 +7,7 @@ app.config['DEBUG'] = True
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:launchcode@localhost:3306/blogz'
 app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
+app.secret_key = 'y337kGcys&zP3B'
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -32,7 +33,15 @@ class Blog(db.Model):
         self.owner = owner  
 
     def __repr__(self):
-        return  '<Title: {0}>'.format(self.title)   
+        return  '<Title: {0}>'.format(self.title)
+
+@app.before_request
+def required_login():
+    allowed_routes = ['login', 'signup', 'index', 'list_blogs']
+    if request.endpoint not in allowed_routes and 'username' not in session:
+        return redirect('/login')
+
+
 
 @app.route("/login", methods = ['POST', "GET"])
 def login():
@@ -41,7 +50,7 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username = username).first()
         if user and user.password == password:
-            # TODO remember that user logged in
+            session['username'] = username
             return redirect("/newpost")
         else:
             # TODO tell them why login failed
@@ -63,16 +72,21 @@ def signup():
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
-            # TODO remember the user
+            session['username'] = username
             return redirect("/newpost")
         else:
             # TODO message that the username is taken
             return '<h1>Duplicate username</h1>'    
 
-    return render_template("signup.html")    
+    return render_template("signup.html")
+
+@app.route('/logout')
+def logout():
+    del session['username']
+    return redirect('/blog')
 
 @app.route('/blog')
-def blog():
+def list_blogs():
 
     blog_id_str = request.args.get('id')
     if blog_id_str:
