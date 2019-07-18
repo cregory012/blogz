@@ -1,8 +1,5 @@
-#title-error {
-    color:red;
-}
-#body-error {
-    color:red;
+.error {
+    color: red;
 }
 
 body {
@@ -26,4 +23,19 @@ th {
 td {
     vertical-align: top;
     padding-bottom: 15px;
+}
+
+nav ul {
+    padding: 0;
+    display: inline-block;
+}
+
+nav ul li {
+    list-style: none;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+nav #user-account {
+    float: right;
 }

@@ -59,24 +59,62 @@ def login():
 
     return render_template("login.html")
 
+def no_space(name):
+     if name.count(" ") == 0:
+          return True
+     else:
+          return False     
+
+def right_length(name):
+     if len(name) > 2 and len(name) < 21: 
+          return True
+     else:
+          return False 
+    
+
 @app.route("/signup", methods = ['POST', "GET"])
 def signup():
+
     if request.method == 'POST':
-        username = request.form["username"]
+        username = request.form['username']
+        if not right_length(username) or not no_space(username):
+            user_error = "That's not a valid username"
+            username = ""
+        else: 
+            user_error = ''
+
         password = request.form['password']
-        verify = request.form["verify"]
-        # TODO validate: password and verify
+        if not right_length(password) or not no_space(password):
+            pass_error = "That's not a valid password"
+        else:
+            pass_error = ''
+
+        verify = request.form['verify']
+        if password != verify:
+            verify_error = "Passwords don't match"
+        else:
+            verify_error = ''
 
         existing_user = User.query.filter_by(username = username).first()
-        if not existing_user:
+        if existing_user:
+            existence_error = "That username already exists"
+            username = ''
+        else:
+            existence_error = ''    
+
+
+        if user_error or pass_error or verify_error or existence_error:
+            password = ""
+            verify = ""
+            return render_template("signup.html", username= username, password = password,
+                verify = verify, user_error = user_error, pass_error = pass_error, 
+                verify_error = verify_error, existence_error = existence_error)
+        else:
             new_user = User(username, password)
             db.session.add(new_user)
             db.session.commit()
             session['username'] = username
             return redirect("/newpost")
-        else:
-            # TODO message that the username is taken
-            return '<h1>Duplicate username</h1>'    
 
     return render_template("signup.html")
 

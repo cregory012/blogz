@@ -7,22 +7,27 @@
         <tr>
             <td><label for="username">Username</label></td>
             <td>
-                <input name="username" type="text" value="{{ username }}">
+                <input id="username" type="text" name= "username" value = '{{username}}'/>
+                <span class="error">{{user_error}}</span> 
+                <span class="error">{{existence_error}}</span>   
             </td>
         </tr>
         <tr>
             <td><label for="password">Password</label></td>
             <td>
-                <input name="password" type="password">
+                <input id="password" type="password" name="password" value='{{password}}'/>
+                <span class="error">{{pass_error}}</span>
             </td>
         </tr>
         <tr>
             <td><label for="verify">Verify Password</label></td>
             <td>
-                <input name="verify" type="password">
+                <input id="verify" type="password" name="verify" value='{{verify}}'/>
+                <span class="error">{{verify_error}}</span>
             </td>
         </tr>
     </table>
-    <input type="submit" value="Signup">
+    <input type="submit" value="Submit Query"/>
 </form>
+
 {% endblock %}
