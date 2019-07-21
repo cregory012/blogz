@@ -1,39 +1,8 @@
 from flask import Flask, redirect, request, render_template, session, flash
 from flask_sqlalchemy import SQLAlchemy 
+from models import User, Blog
+from app import app, db
 
-
-app = Flask(__name__)
-app.config['DEBUG'] = True
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://blogz:launchcode@localhost:3306/blogz'
-app.config['SQLALCHEMY_ECHO'] = True
-db = SQLAlchemy(app)
-app.secret_key = 'y337kGcys&zP3B'
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(120), unique = True)
-    password = db.Column(db.String(120))
-    blogs = db.relationship('Blog', backref = 'owner')
-
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
-
-
-class Blog(db.Model):
-
-    id = db.Column(db.Integer, primary_key = True)
-    title = db.Column(db.String(120))
-    body = db.Column(db.String(500))
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-
-    def __init__(self, title, body, owner):
-        self.title = title
-        self.body = body
-        self.owner = owner  
-
-    def __repr__(self):
-        return  '<Title: {0}>'.format(self.title)
 
 @app.before_request
 def required_login():
@@ -57,6 +26,10 @@ def login():
             flash("User password incorrect, or user does not exist", 'error') 
 
     return render_template("login.html")
+
+
+def get_logged_in_user():
+    return User.query.filter_by(username = session['username']).first()
 
 def no_space(name):
      if name.count(" ") == 0:
@@ -173,8 +146,7 @@ def new_post():
             return render_template('newpost.html', title_html="Add Blog Entry",
              title_error=title_error, body_error=body_error, title=blog_title, body=blog_body)
         else:
-            owner = User.query.filter_by(username = session['username']).first()
-            new_blog = Blog(blog_title, blog_body, owner)
+            new_blog = Blog(blog_title, blog_body, get_logged_in_user())
             db.session.add(new_blog)
             db.session.commit()
             return redirect("/blog?id="+ str(new_blog.id))

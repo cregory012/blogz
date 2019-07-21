@@ -39,3 +39,22 @@ nav ul li {
 nav #user-account {
     float: right;
 }
+
+.post-author {
+    font-style: italic;
+    font-size: 12px;
+}
+
+.post-body {
+    margin: 0;
+    font-size: 17px;
+}
+
+.post-title {
+    font-weight: bold;
+    font-size: 20px;
+}
+
+hr {
+    margin: 20px auto;
+}
