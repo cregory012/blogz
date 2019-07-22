@@ -25,7 +25,7 @@ def login():
         else:
             flash("User password incorrect, or user does not exist", 'error') 
 
-    return render_template("login.html")
+    return render_template("login.html", title_html="Login")
 
 
 def get_logged_in_user():
@@ -88,7 +88,7 @@ def signup():
             session['username'] = username
             return redirect("/newpost")
 
-    return render_template("signup.html")
+    return render_template("signup.html", title_html="Signup")
 
 @app.route('/logout')
 def logout():
@@ -105,22 +105,22 @@ def list_blogs():
         owner = User.query.filter_by(username = username_request).first()
         blog_id = int(blog_id_str)
         blog = Blog.query.get(blog_id)
-        return render_template('singleUser.html', title_html="Display Blog", blog=blog)
+        return render_template('singleUser.html', title_html="Blog", blog=blog)
 
     if username_request:
         single_owner = User.query.filter_by(username = username_request).first()
         blogs = Blog.query.filter_by(owner = single_owner).order_by(Blog.id.desc()).all()
-        return render_template("blog.html", blogs = blogs)
+        return render_template("blog.html", title_html = "User's Blogs", blogs = blogs)
         
 
 
     blogs = Blog.query.order_by(Blog.id.desc()).all()
-    return render_template('blog.html', title_html="Build A Blog", blogs=blogs)
+    return render_template('blog.html', title_html="All Blogs", blogs=blogs)
 
 @app.route("/")
 def home():
     users = User.query.all()
-    return render_template("index.html", users = users)
+    return render_template("index.html", title_html="Home", users = users)
 
 @app.route('/newpost', methods=['POST', 'GET'])
 def new_post():
